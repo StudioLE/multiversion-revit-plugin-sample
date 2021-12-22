@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk" InitialTargets="ValidateRevitVersion">
 
   <!-- Set metadata for the assembly -->
   <PropertyGroup>
@@ -11,37 +11,19 @@
     <Copyright>© Copyright 2021</Copyright>
     <PackageProjectUrl>https://www.matterlab.co/post/multiversion-revit-plugins-explained</PackageProjectUrl>
     <NeutralLanguage>en</NeutralLanguage>
+    <Configurations>2018;2019;2020;2021;2022</Configurations>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' != 'Release'">
+    <RevitVersion>$(Configuration)</RevitVersion>
   </PropertyGroup>
 
   <PropertyGroup>
-    <!-- Please remove the targets you don't need in order
-      to exclude Revit versions your add-in won't support
-      use the list below for matching Revit version with .NET target
-              2014  |  net40
-              2015  |  net45
-              2016  |  net451
-              2017  |  net452
-              2018  |  net46
-              2019  |  net47
-              2020  |  net471
-              2021  |  net48
-      For example you can exclude Revit 2014, by simply removing net40 target belows
-      -->
-    <TargetFrameworks>net46;net47;net471;net48</TargetFrameworks>
-    <RuntimeIdentifiers>win</RuntimeIdentifiers>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net46' ">
-    <RevitVersion>2018</RevitVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net47' ">
-    <RevitVersion>2019</RevitVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net471' ">
-    <RevitVersion>2020</RevitVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net48' ">
-    <RevitVersion>2021</RevitVersion>
+    <TargetFramework Condition="'$(RevitVersion)' == '2018'">net46</TargetFramework>
+    <TargetFramework Condition="'$(RevitVersion)' == '2019'">net47</TargetFramework>
+    <TargetFramework Condition="'$(RevitVersion)' == '2020'">net471</TargetFramework>
+    <TargetFramework Condition="'$(RevitVersion)' == '2021'">net48</TargetFramework>
+    <TargetFramework Condition="'$(RevitVersion)' == '2022'">net48</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -63,7 +45,7 @@
 
     <!-- Override 'OutputPath' to Debug/Release + Revit version -->
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <OutputPath>..\bin\$(Configuration)\$(RevitVersion)</OutputPath>
+    <OutputPath>..\bin\Debug\$(RevitVersion)</OutputPath>
   </PropertyGroup>
 
   <!--We can define our custom preprocessor constants to simplify our project code-->
@@ -102,8 +84,7 @@
     <ItemGroup>
       <AddinManifest Include="$(OutputPath)\$(AssemblyName).addin" />
     </ItemGroup>
-    <ReplaceFileText Condition="'$(Configuration)' == 'Release'" InputFilename="@(AddinManifest)" OutputFilename="@(AddinManifest)" MatchExpression="Assembly&gt;(.*?)&lt;" ReplacementText="Assembly&gt;$(AssemblyName).dll&lt;" />
-    <ReplaceFileText Condition="'$(Configuration)' == 'Debug'" InputFilename="@(AddinManifest)" OutputFilename="@(AddinManifest)" MatchExpression="Assembly&gt;(.*?)&lt;" ReplacementText="Assembly&gt;$([System.IO.Path]::GetFullPath('$(OutputPath)'))$(AssemblyName).dll&lt;" />
+    <ReplaceFileText Condition="'$(Configuration)' != 'Release'" InputFilename="@(AddinManifest)" OutputFilename="@(AddinManifest)" MatchExpression="Assembly&gt;(.*?)&lt;" ReplacementText="Assembly&gt;$([System.IO.Path]::GetFullPath('$(OutputPath)'))$(AssemblyName).dll&lt;" />
   </Target>
 
   <!-- Define the ReplaceFileText task for .NET Framework  -->
@@ -121,8 +102,8 @@
       <Using Namespace="System.Text.RegularExpressions" />
       <Code Type="Fragment" Language="cs">
         <![CDATA[
-              File.WriteAllText(OutputFilename,Regex.Replace(File.ReadAllText(InputFilename),MatchExpression,ReplacementText));
-        ]]>
+            File.WriteAllText(OutputFilename,Regex.Replace(File.ReadAllText(InputFilename),MatchExpression,ReplacementText));
+      ]]>
       </Code>
     </Task>
   </UsingTask>
@@ -141,14 +122,14 @@
       <Using Namespace="System.Text.RegularExpressions" />
       <Code Type="Fragment" Language="cs">
         <![CDATA[
-              File.WriteAllText(OutputFilename,Regex.Replace(File.ReadAllText(InputFilename),MatchExpression,ReplacementText));
-        ]]>
+            File.WriteAllText(OutputFilename,Regex.Replace(File.ReadAllText(InputFilename),MatchExpression,ReplacementText));
+      ]]>
       </Code>
     </Task>
   </UsingTask>
 
   <!-- For the Debug configuration copy the addin to $(AppData)\Autodesk\Revit\Addins\  -->
-  <Target Name="CopyAddinsToAppData" AfterTargets="CreateAddinManifest" Condition="'$(Configuration)' == 'Debug'">
+  <Target Name="CopyAddinsToAppData" AfterTargets="CreateAddinManifest" Condition="'$(Configuration)' != 'Release'">
     <Message Importance="high" Text="Copying addin file into Revit Addin folder" />
     <ItemGroup>
       <AddinFiles Include="$(OutputPath)\..\**\*.addin" />
@@ -162,6 +143,11 @@
       <AddinFiles Include="$(AppData)\Autodesk\Revit\Addins\**\$(AssemblyName).*" />
     </ItemGroup>
     <Delete Files="@(AddinFiles)" />
+  </Target>
+
+  <Target Name="ValidateRevitVersion">
+    <Error Condition="'$(RevitVersion)' == ''" Text="RevitVersion was not set" />
+    <Exec Command="echo Building for Revit $(RevitVersion) $(TargetFramework)" />
   </Target>
 
 </Project>
