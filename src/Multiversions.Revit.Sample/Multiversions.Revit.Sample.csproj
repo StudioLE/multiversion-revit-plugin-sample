@@ -11,7 +11,7 @@
     <Copyright>© Copyright 2021</Copyright>
     <PackageProjectUrl>https://www.matterlab.co/post/multiversion-revit-plugins-explained</PackageProjectUrl>
     <NeutralLanguage>en</NeutralLanguage>
-    <Configurations>2018;2019;2020;2021;2022</Configurations>
+    <Configurations>2018;2019;2020;2021;2022;Release</Configurations>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' != 'Release'">
@@ -146,8 +146,37 @@
   </Target>
 
   <Target Name="ValidateRevitVersion">
-    <Error Condition="'$(RevitVersion)' == ''" Text="RevitVersion was not set" />
-    <Exec Command="echo Building for Revit $(RevitVersion) $(TargetFramework)" />
+    <CallTarget Targets="BuildAll" Condition="'$(RevitVersion)' == ''" />
+    <Error Condition="'$(RevitVersion)' == ''" Text="RevitVersion was not set" Code="0" />
+    <Exec Command="echo Executing for Revit $(RevitVersion) $(TargetFramework)" />
+  </Target>
+
+  <Target Name="BuildAll">
+    <MSBuild Projects="$(MSBuildProjectFullPath)"
+             Properties="Configuration=Release;RevitVersion=2018"
+             Targets="Restore;Rebuild"
+             StopOnFirstFailure="true"
+             BuildInParallel="false"/>
+    <MSBuild Projects="$(MSBuildProjectFullPath)"
+             Properties="Configuration=Release;RevitVersion=2019"
+             Targets="Restore;Rebuild"
+             StopOnFirstFailure="true"
+             BuildInParallel="false"/>
+    <MSBuild Projects="$(MSBuildProjectFullPath)"
+             Properties="Configuration=Release;RevitVersion=2020"
+             Targets="Restore;Rebuild"
+             StopOnFirstFailure="true"
+             BuildInParallel="false"/>
+    <MSBuild Projects="$(MSBuildProjectFullPath)"
+             Properties="Configuration=Release;RevitVersion=2021"
+             Targets="Restore;Rebuild"
+             StopOnFirstFailure="true"
+             BuildInParallel="false"/>
+    <MSBuild Projects="$(MSBuildProjectFullPath)"
+             Properties="Configuration=Release;RevitVersion=2022"
+             Targets="Restore;Rebuild"
+             StopOnFirstFailure="true"
+             BuildInParallel="false"/>
   </Target>
 
 </Project>
