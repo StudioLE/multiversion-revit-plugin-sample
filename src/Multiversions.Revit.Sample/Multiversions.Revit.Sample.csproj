@@ -55,7 +55,7 @@
 
     <!-- Override 'OutputPath' to Debug/Release + Revit version -->
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <OutputPath>..\bin\Debug\$(RevitVersion)</OutputPath>
+    <OutputPath>..\bin\$(Configuration)\$(RevitVersion)</OutputPath>
   </PropertyGroup>
 
   <!--We can define our custom preprocessor constants to simplify our project code-->
