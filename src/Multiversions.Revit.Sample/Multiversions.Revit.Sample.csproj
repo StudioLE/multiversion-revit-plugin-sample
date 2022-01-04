@@ -11,12 +11,12 @@
     <Copyright>© Copyright 2021</Copyright>
     <PackageProjectUrl>https://www.matterlab.co/post/multiversion-revit-plugins-explained</PackageProjectUrl>
     <NeutralLanguage>en</NeutralLanguage>
-    <Configurations>2018;2019;2020;2021;2022;Release</Configurations>
   </PropertyGroup>
 
   <!-- Debug configuration - Individual Revit version -->
   <PropertyGroup Condition="'$(Configuration)' != 'Release'">
-    <RevitVersion>$(Configuration)</RevitVersion>
+    <!-- Set the desired Revit version to Debug here -->
+    <RevitVersion>2021</RevitVersion>
 
     <TargetFramework Condition="'$(RevitVersion)' == '2018'">net46</TargetFramework>
     <TargetFramework Condition="'$(RevitVersion)' == '2019'">net47</TargetFramework>
@@ -27,6 +27,7 @@
 
   <!-- Release configuration - All Revit versions -->
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <!-- Specify the desired Revit versions (by their target framework) to release here -->
     <TargetFrameworks>net46;net47;net471;net48</TargetFrameworks>
 
     <RevitVersion Condition="'$(TargetFramework)' == 'net46'">2018</RevitVersion>
