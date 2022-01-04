@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk" InitialTargets="ValidateRevitVersion">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <!-- Set metadata for the assembly -->
   <PropertyGroup>
@@ -14,16 +14,25 @@
     <Configurations>2018;2019;2020;2021;2022;Release</Configurations>
   </PropertyGroup>
 
+  <!-- Debug configuration - Individual Revit version -->
   <PropertyGroup Condition="'$(Configuration)' != 'Release'">
     <RevitVersion>$(Configuration)</RevitVersion>
-  </PropertyGroup>
 
-  <PropertyGroup>
     <TargetFramework Condition="'$(RevitVersion)' == '2018'">net46</TargetFramework>
     <TargetFramework Condition="'$(RevitVersion)' == '2019'">net47</TargetFramework>
     <TargetFramework Condition="'$(RevitVersion)' == '2020'">net471</TargetFramework>
     <TargetFramework Condition="'$(RevitVersion)' == '2021'">net48</TargetFramework>
     <TargetFramework Condition="'$(RevitVersion)' == '2022'">net48</TargetFramework>
+  </PropertyGroup>
+
+  <!-- Release configuration - All Revit versions -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <TargetFrameworks>net46;net47;net471;net48</TargetFrameworks>
+
+    <RevitVersion Condition="'$(TargetFramework)' == 'net46'">2018</RevitVersion>
+    <RevitVersion Condition="'$(TargetFramework)' == 'net47'">2019</RevitVersion>
+    <RevitVersion Condition="'$(TargetFramework)' == 'net471'">2020</RevitVersion>
+    <RevitVersion Condition="'$(TargetFramework)' == 'net48'">2021</RevitVersion>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -143,40 +152,6 @@
       <AddinFiles Include="$(AppData)\Autodesk\Revit\Addins\**\$(AssemblyName).*" />
     </ItemGroup>
     <Delete Files="@(AddinFiles)" />
-  </Target>
-
-  <Target Name="ValidateRevitVersion">
-    <CallTarget Targets="BuildAll" Condition="'$(RevitVersion)' == ''" />
-    <Error Condition="'$(RevitVersion)' == ''" Text="RevitVersion was not set" Code="0" />
-    <Exec Command="echo Executing for Revit $(RevitVersion) $(TargetFramework)" />
-  </Target>
-
-  <Target Name="BuildAll">
-    <MSBuild Projects="$(MSBuildProjectFullPath)"
-             Properties="Configuration=Release;RevitVersion=2018"
-             Targets="Restore;Rebuild"
-             StopOnFirstFailure="true"
-             BuildInParallel="false"/>
-    <MSBuild Projects="$(MSBuildProjectFullPath)"
-             Properties="Configuration=Release;RevitVersion=2019"
-             Targets="Restore;Rebuild"
-             StopOnFirstFailure="true"
-             BuildInParallel="false"/>
-    <MSBuild Projects="$(MSBuildProjectFullPath)"
-             Properties="Configuration=Release;RevitVersion=2020"
-             Targets="Restore;Rebuild"
-             StopOnFirstFailure="true"
-             BuildInParallel="false"/>
-    <MSBuild Projects="$(MSBuildProjectFullPath)"
-             Properties="Configuration=Release;RevitVersion=2021"
-             Targets="Restore;Rebuild"
-             StopOnFirstFailure="true"
-             BuildInParallel="false"/>
-    <MSBuild Projects="$(MSBuildProjectFullPath)"
-             Properties="Configuration=Release;RevitVersion=2022"
-             Targets="Restore;Rebuild"
-             StopOnFirstFailure="true"
-             BuildInParallel="false"/>
   </Target>
 
 </Project>
